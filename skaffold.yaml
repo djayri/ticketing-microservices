@@ -1,0 +1,23 @@
+apiVersion: skaffold/v2alpha3
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - ./infra/k8s/*
+build:
+  local:
+    push: false
+  # googleCloudBuild:
+  #   projectId: ticketing-udemy-349309
+  artifacts:
+    # - image: us.gcr.io/ticketing-udemy-349309/auth
+    - image: djayriyadhi/auth
+      context: auth
+      docker:
+        dockerfile: Dockerfile
+        # buildArgs:
+        #   platform: linux/amd64
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
