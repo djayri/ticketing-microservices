@@ -1,30 +1,51 @@
 import express, { Request, Response } from "express";
-import { body, validationResult } from "express-validator";
-import { DatabaseConnectionError } from "../errors/database-connection-error";
-import { RequestValidationError } from "../errors/request-validation-error";
+import { body } from "express-validator";
+import jwt from "jsonwebtoken";
+import { BadRequestError } from "../errors/bad-request-error";
+import { validateRequest } from "../middleware/validate-request";
+import { User } from "../models/user";
+import { Password } from "../services/password";
 const router = express.Router();
 
 router.post(
   "/api/users/signin",
   [
     body("email").isEmail().withMessage("Email must be valid"),
-    body("password")
-      .trim()
-      .isLength({ min: 4, max: 20 })
-      .withMessage("Password must be between 4 and 20 characters"),
+    body("password").trim().notEmpty().withMessage("Supply a password"),
   ],
-  (req: Request, res: Response) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new RequestValidationError(errors.array());
-    }
-
+  validateRequest,
+  async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    if (password === "dber") {
-      throw new DatabaseConnectionError("invalid db");
+
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      throw new BadRequestError("Invalid credentials e");
     }
-    res.send({});
+
+    const isPasswordMatch = await Password.compare(
+      existingUser.password,
+      password
+    );
+    if (!isPasswordMatch) {
+      throw new BadRequestError("Invalid credentials p");
+    }
+
+    const userJWT = jwt.sign(
+      {
+        email: existingUser.email,
+        id: existingUser.id,
+      },
+      process.env.JWT_KEY!
+    );
+
+    req.session = {
+      jwt: userJWT,
+    };
+
+    res.send({
+      id: existingUser.id,
+      email: existingUser.email,
+    });
   }
 );
 
