@@ -42,7 +42,7 @@ router.post(
       jwt: userJWT,
     };
 
-    res.send({
+    res.status(201).send({
       id: existingUser.id,
       email: existingUser.email,
     });

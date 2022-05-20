@@ -36,7 +36,7 @@ router.post(
       jwt: userJWT,
     };
 
-    res.send({ id: newUser.id, email: newUser.email });
+    res.status(201).send({ id: newUser.id, email: newUser.email });
   }
 );
 
