@@ -16,8 +16,6 @@ interface UserModel extends mongoose.Model<UserDoc> {
 interface UserDoc extends mongoose.Document {
   email: string;
   password: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 const userSchema = new mongoose.Schema({
