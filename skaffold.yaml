@@ -29,6 +29,14 @@ build:
         manual:
           - src: "src/**/*.ts"
             dest: .
+    - image: djayriyadhi/orders
+      context: orders
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
     - image: djayriyadhi/ticketing-client
       context: client
       docker:
