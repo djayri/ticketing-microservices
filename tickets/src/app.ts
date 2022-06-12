@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express from "express";
 import { json } from "body-parser";
 import "express-async-errors";
 import cookieSession from "cookie-session";
@@ -7,8 +7,7 @@ import {
   NotFoundError,
   currentUser,
 } from "@ticketing-ms-djay/common";
-import { newTicketRouter } from "./routes/new-ticket";
-import allRouter from "./routes";
+import * as allRouter from "./routes";
 
 const app = express();
 app.set("trust proxy", true);
@@ -23,10 +22,6 @@ app.use(
 
 app.use(currentUser);
 
-interface AllRouter {
-  newTicketRouter: Router;
-  getTicketRouter: Router;
-}
 Object.entries(allRouter).forEach(([key, value]) => {
   app.use(value);
 });
