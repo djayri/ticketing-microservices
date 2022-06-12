@@ -7,6 +7,8 @@ import {
 } from "@ticketing-ms-djay/common";
 import { body } from "express-validator";
 import { Ticket } from "../models/ticket";
+import { natsWrapper } from "../nats-wrapper";
+import { TicketUpdatedPublisher } from "../events/publishers/ticket-updated-publisher";
 const router = express.Router();
 
 router.put(
@@ -35,6 +37,12 @@ router.put(
       price: req.body.price,
     });
     await existingTicket.save();
+    await new TicketUpdatedPublisher(natsWrapper.client).publish({
+      id: existingTicket.id,
+      title: existingTicket.title,
+      price: existingTicket.price,
+      userId: existingTicket.userId,
+    });
 
     res.status(200).send(existingTicket);
   }

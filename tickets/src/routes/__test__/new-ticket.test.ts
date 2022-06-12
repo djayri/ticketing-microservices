@@ -1,6 +1,7 @@
 import request from "supertest";
 import { app } from "../../app";
 import { Ticket } from "../../models/ticket";
+import { natsWrapper } from "../../nats-wrapper";
 
 const path = "/api/tickets";
 
@@ -58,4 +59,6 @@ it("return 201 for valid input with logged-in user", async () => {
   expect(tickets.length).toEqual(1);
   expect(tickets[0].title).toEqual(title);
   expect(tickets[0].price).toEqual(price);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
 });

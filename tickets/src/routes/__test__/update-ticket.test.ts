@@ -1,5 +1,6 @@
 import request from "supertest";
 import { app } from "../../app";
+import { natsWrapper } from "../../nats-wrapper";
 
 const path = "/api/tickets";
 
@@ -115,4 +116,6 @@ it("return updated ticket if ticket updated successfully", async () => {
 
   expect(getResponse.body.title).toEqual(newTitle);
   expect(getResponse.body.price).toEqual(newPrice);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(2);
 });
