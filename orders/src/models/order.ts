@@ -1,38 +1,47 @@
 import mongoose from "mongoose";
+import { OrderStatus } from "@ticketing-ms-djay/common";
+import { TicketDoc } from "./ticket";
+
+export { OrderStatus };
 
 interface OrderAttrs {
-  ticketId: string;
-  status: number;
   userId: string;
-  expiresAt: number;
+  status: OrderStatus;
+  expiresAt: Date;
+  ticket: TicketDoc;
 }
 
 // interface for order doc in mongodb
 interface OrderDoc extends mongoose.Document {
-  title: string;
-  price: number;
   userId: string;
+  status: OrderStatus;
+  expiresAt: Date;
+  ticket: TicketDoc;
 }
 
 // this is to inform typescript that we have build function in a model
-// which accept OrderAttrs interface
+// which accept OrderAttrs interface and return OrderDoc
 interface OrderModel extends mongoose.Model<OrderDoc> {
   build(attrs: OrderAttrs): OrderDoc;
 }
 
 const orderSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
     userId: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: Object.values(OrderStatus),
+    },
+    expiresAt: {
+      type: mongoose.Schema.Types.Date,
+    },
+    ticket: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Ticket",
     },
   },
   {
@@ -49,6 +58,4 @@ orderSchema.statics.build = (data: OrderAttrs) => {
   return new Order(data);
 };
 
-const Order = mongoose.model<OrderDoc, OrderModel>("Order", orderSchema);
-
-export { Order };
+export const Order = mongoose.model<OrderDoc, OrderModel>("Order", orderSchema);
