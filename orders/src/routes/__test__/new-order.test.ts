@@ -2,7 +2,6 @@ import request from "supertest";
 import { app } from "../../app";
 import { Order, OrderStatus } from "../../models/order";
 import { Ticket, TicketDoc } from "../../models/ticket";
-import { natsWrapper } from "../../nats-wrapper";
 import mongoose from "mongoose";
 
 const PATH = "/api/orders";
@@ -58,3 +57,5 @@ it("returns created order if order successfully created", async () => {
 
   expect(createdOrder.body.status).toEqual(OrderStatus.Created);
 });
+
+it.todo("emits order:created event");
