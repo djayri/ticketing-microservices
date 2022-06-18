@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ticketing-ms-djay/common": "^1.0.15",
     "@types/node": "^17.0.41",
     "node-nats-streaming": "^0.3.2",
     "ts-node-dev": "^2.0.0",
