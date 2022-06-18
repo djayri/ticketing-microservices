@@ -3,11 +3,14 @@ import request from "supertest";
 import { app } from "../../app";
 import { Order, OrderStatus } from "../../models/order";
 import { Ticket } from "../../models/ticket";
+import { natsWrapper } from "../../nats-wrapper";
 
 const PATH = "/api/orders";
 
 const insertOrder = async (userId?: string) => {
+  const id = new mongoose.Types.ObjectId().toHexString();
   const ticket = Ticket.build({
+    id,
     price: 1,
     title: "ticket title",
   });
@@ -62,4 +65,18 @@ it("throw 404 if order does not exists", async () => {
     .expect(404);
 });
 
-it.todo("emits order:cancelled event");
+it("emits order:cancelled event", async () => {
+  const userIdOne = "user1";
+  const order = await insertOrder(userIdOne);
+
+  const orderResponse = await request(app)
+    .put(`${PATH}/${order.id}`)
+    .set("Cookie", global.generateAuthCookie(userIdOne))
+    .send({})
+    .expect(200);
+
+  expect(orderResponse.body.id).toEqual(order.id);
+  expect(orderResponse.body.status).toEqual(OrderStatus.Cancelled);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
+});

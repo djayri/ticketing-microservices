@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import request from "supertest";
 import { app } from "../../app";
 import { Order, OrderStatus } from "../../models/order";
@@ -5,7 +6,9 @@ import { Ticket, TicketDoc } from "../../models/ticket";
 
 const PATH = "/api/orders";
 const insertTicket = async () => {
+  const id = new mongoose.Types.ObjectId().toHexString();
   const ticket = Ticket.build({
+    id,
     price: 1,
     title: "ticket title",
   });

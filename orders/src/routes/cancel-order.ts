@@ -5,6 +5,8 @@ import {
   requireAuth,
 } from "@ticketing-ms-djay/common";
 import { Order, OrderStatus } from "../models/order";
+import { OrcderCancelledPublish } from "../events/publisher/order-cancelled-publisher";
+import { natsWrapper } from "../nats-wrapper";
 
 const router = express.Router();
 
@@ -13,7 +15,7 @@ router.put(
   requireAuth,
   async (req: Request, res: Response) => {
     const { orderId } = req.params;
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate("ticket");
     if (!order) {
       throw new NotFoundError();
     }
@@ -27,6 +29,12 @@ router.put(
 
     // publish order:cancelled event
 
+    await new OrcderCancelledPublish(natsWrapper.client).publish({
+      id: order.id,
+      ticket: {
+        id: order.ticket.id,
+      },
+    });
     res.status(200).send(order);
   }
 );

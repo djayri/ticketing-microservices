@@ -8,6 +8,8 @@ import {
 } from "@ticketing-ms-djay/common";
 import { Order, OrderStatus } from "../models/order";
 import { Ticket } from "../models/ticket";
+import { natsWrapper } from "../nats-wrapper";
+import { OrderCreatedPublish } from "../events/publisher/order-created-publisher";
 
 const ORDER_EXPIRATION_WINDOW_SECONDS = 15 * 60;
 const router = express.Router();
@@ -41,6 +43,17 @@ router.post(
     });
 
     order.save();
+
+    await new OrderCreatedPublish(natsWrapper.client).publish({
+      id: order.id,
+      userId: order.userId,
+      expiresAt: order.expiresAt.toISOString(),
+      status: order.status,
+      ticket: {
+        id: order.ticket.id,
+        price: order.ticket.price,
+      },
+    });
 
     res.status(201).send(order);
   }

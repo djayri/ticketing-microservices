@@ -3,10 +3,13 @@ import { app } from "../../app";
 import { Order, OrderStatus } from "../../models/order";
 import { Ticket, TicketDoc } from "../../models/ticket";
 import mongoose from "mongoose";
+import { natsWrapper } from "../../nats-wrapper";
 
 const PATH = "/api/orders";
 const insertTicket = async () => {
+  const id = new mongoose.Types.ObjectId().toHexString();
   const ticket = Ticket.build({
+    id,
     price: 1,
     title: "ticket title",
   });
@@ -58,4 +61,16 @@ it("returns created order if order successfully created", async () => {
   expect(createdOrder.body.status).toEqual(OrderStatus.Created);
 });
 
-it.todo("emits order:created event");
+it("emits order:created event", async () => {
+  const ticket = await insertTicket();
+  // const order = await insertOrder(ticket);
+  const createdOrder = await request(app)
+    .post(PATH)
+    .set("Cookie", global.generateAuthCookie())
+    .send({ ticketId: ticket.id })
+    .expect(201);
+
+  expect(createdOrder.body.status).toEqual(OrderStatus.Created);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
+});
