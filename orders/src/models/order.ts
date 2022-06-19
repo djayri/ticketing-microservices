@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { OrderStatus } from "@ticketing-ms-djay/common";
 import { TicketDoc } from "./ticket";
+import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 
 export { OrderStatus };
 
@@ -17,6 +18,7 @@ interface OrderDoc extends mongoose.Document {
   status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
+  version: number;
 }
 
 // this is to inform typescript that we have build function in a model
@@ -53,7 +55,8 @@ const orderSchema = new mongoose.Schema(
     },
   }
 );
-
+orderSchema.set("versionKey", "version");
+orderSchema.plugin(updateIfCurrentPlugin);
 orderSchema.statics.build = (data: OrderAttrs) => {
   return new Order(data);
 };

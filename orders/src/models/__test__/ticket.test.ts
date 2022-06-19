@@ -13,37 +13,37 @@ const insertTicket = async () => {
 it("OCC, throw error for invalid version", async () => {
   const ticket = await insertTicket();
 
-  const ticketOne = await Ticket.findById(ticket.id);
-  let ticketTwo = await Ticket.findById(ticket.id);
+  const instanceone = await Ticket.findById(ticket.id);
+  let instanceTwo = await Ticket.findById(ticket.id);
 
-  if (!ticketOne || !ticketTwo) {
-    throw new Error("ticket should exists");
+  if (!instanceone || !instanceTwo) {
+    throw new Error("all instance should exists");
   }
-  ticketOne.set({
-    title: "ticket one",
+  instanceone.set({
+    title: "ticket updated",
   });
 
-  ticketTwo.set({
-    title: "ticket two",
+  instanceTwo.set({
+    title: "ticket updated again",
   });
 
   try {
-    await ticketOne.save();
-    await ticketTwo.save();
+    await instanceone.save();
+    await instanceTwo.save();
     fail("should throw error");
   } catch (err) {
     expect(err).toBeDefined();
   }
 
   // retry find ticket
-  ticketTwo = await Ticket.findById(ticket.id);
-  if (!ticketTwo) {
+  instanceTwo = await Ticket.findById(ticket.id);
+  if (!instanceTwo) {
     throw new Error("ticket should exists");
   }
-  ticketTwo.set({
-    title: "ticket two",
+  instanceTwo.set({
+    title: "ticket updated again",
   });
-  await ticketTwo.save();
-  expect(ticketTwo.title).toEqual("ticket two");
-  expect(ticketTwo.version).toEqual(ticketOne.version + 1);
+  await instanceTwo.save();
+  expect(instanceTwo.title).toEqual("ticket updated again");
+  expect(instanceTwo.version).toEqual(instanceone.version + 1);
 });

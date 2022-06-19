@@ -13,7 +13,7 @@ const start = async () => {
   try {
     await connectToNats();
     await connectToMongo();
-    await listenToEvents();
+    listenToEvents();
   } catch (err) {
     console.log({ err });
   }

@@ -9,20 +9,21 @@ import { Ticket } from "../../models/ticket";
 export class TicketUpdatedListener extends BaseListener<TicketUpdatedEvent> {
   readonly subject = Subjects.TicketUpdated;
   queueGroupName: string = "orders-service";
+
   async onMessage(
     data: TicketUpdatedEvent["data"],
     msg: Message
   ): Promise<void> {
-    const { id, price, title } = data;
-    const ticket = await Ticket.findById(id);
+    const { id, price, title, version } = data;
+    const ticket = await Ticket.findOne({ _id: id, version: version - 1 });
     if (!ticket) {
-      throw new Error("no ticket found");
+      console.log(
+        `ticket not found for id:${id}, version:${version}, skip the update`
+      );
+      return;
     }
 
-    ticket.set({
-      price,
-      title,
-    });
+    ticket.set({ price, title });
     await ticket.save();
     msg.ack();
   }

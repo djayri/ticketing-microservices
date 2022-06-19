@@ -31,6 +31,7 @@ router.put(
 
     await new OrcderCancelledPublish(natsWrapper.client).publish({
       id: order.id,
+      version: order.version,
       ticket: {
         id: order.ticket.id,
       },
