@@ -42,6 +42,7 @@ router.put(
       title: existingTicket.title,
       price: existingTicket.price,
       userId: existingTicket.userId,
+      version: existingTicket.version,
     });
 
     res.status(200).send(existingTicket);
