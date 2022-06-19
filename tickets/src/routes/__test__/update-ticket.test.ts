@@ -1,5 +1,8 @@
+import { Subjects } from "@ticketing-ms-djay/common";
+import mongoose from "mongoose";
 import request from "supertest";
 import { app } from "../../app";
+import { Ticket } from "../../models/ticket";
 import { natsWrapper } from "../../nats-wrapper";
 
 const path = "/api/tickets";
@@ -118,4 +121,37 @@ it("return updated ticket if ticket updated successfully", async () => {
   expect(getResponse.body.price).toEqual(newPrice);
 
   expect(natsWrapper.client.publish).toHaveBeenCalledTimes(2);
+  expect((natsWrapper.client.publish as jest.Mock).mock.calls[0][0]).toEqual(
+    Subjects.TicketCreated
+  );
+  expect((natsWrapper.client.publish as jest.Mock).mock.calls[1][0]).toEqual(
+    Subjects.TicketUpdated
+  );
+});
+
+it("throw error on reserved ticket", async () => {
+  const userCookie = global.generateAuthCookie();
+  const response = await createTicket({
+    title: "ticket1",
+    price: 1,
+    userCookie,
+  });
+
+  const ticket = await Ticket.findById(response.body.id);
+  ticket!.set({ orderId: new mongoose.Types.ObjectId().toHexString() });
+  await ticket!.save();
+
+  const newTitle = "ticket2";
+  const newPrice = 2;
+  await request(app)
+    .put(`${path}/${response.body.id}`)
+    .set("Cookie", userCookie)
+    .send({ title: newTitle, price: newPrice })
+    .expect(400);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
+
+  // only publish ticket:created event
+  const eventName = (natsWrapper.client.publish as jest.Mock).mock.calls[0][0];
+  expect(eventName).toEqual(Subjects.TicketCreated);
 });

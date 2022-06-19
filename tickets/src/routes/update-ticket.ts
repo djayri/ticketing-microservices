@@ -4,6 +4,7 @@ import {
   NotFoundError,
   ForbiddenError,
   validateRequest,
+  BadRequestError,
 } from "@ticketing-ms-djay/common";
 import { body } from "express-validator";
 import { Ticket } from "../models/ticket";
@@ -27,7 +28,11 @@ router.put(
       throw new NotFoundError();
     }
 
-    const { title, price, userId } = existingTicket;
+    const { title, price, userId, orderId } = existingTicket;
+    if (orderId) {
+      throw new BadRequestError("Cannot edit a reserved ticket");
+    }
+
     if (userId != req.currentUser?.id) {
       throw new ForbiddenError();
     }

@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { natsWrapper } from "./nats-wrapper";
 
 import { app } from "./app";
+import { OrderCancelledListener } from "./events/listeners/order-cancelled-listener";
+import { OrderCreatedListener } from "./events/listeners/order-created-listener";
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -11,6 +13,7 @@ const start = async () => {
   try {
     await connectToNats();
     await connectToMongo();
+    listenToEvents();
   } catch (err) {
     console.log({ err });
   }
@@ -57,6 +60,11 @@ const connectToMongo = async () => {
   }
   await mongoose.connect(process.env.MONGO_URI);
   console.log("connected to mongodb");
+};
+
+const listenToEvents = async () => {
+  new OrderCancelledListener(natsWrapper.client).listen();
+  new OrderCreatedListener(natsWrapper.client).listen();
 };
 
 start();
