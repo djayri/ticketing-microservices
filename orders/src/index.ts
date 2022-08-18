@@ -4,6 +4,7 @@ import { natsWrapper } from "./nats-wrapper";
 import { app } from "./app";
 import { TicketCreatedListener } from "./events/listener/ticket-created-listener";
 import { TicketUpdatedListener } from "./events/listener/ticket-updated-listener";
+import { ExpirationCompleteListener } from "./events/listener/expiration-complete-listener";
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -63,8 +64,10 @@ const connectToMongo = async () => {
 };
 
 const listenToEvents = async () => {
+  //dfdf
   new TicketCreatedListener(natsWrapper.client).listen();
   new TicketUpdatedListener(natsWrapper.client).listen();
+  new ExpirationCompleteListener(natsWrapper.client).listen();
 };
 
 start();

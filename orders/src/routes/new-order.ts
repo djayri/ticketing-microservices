@@ -11,7 +11,7 @@ import { Ticket } from "../models/ticket";
 import { natsWrapper } from "../nats-wrapper";
 import { OrderCreatedPublish } from "../events/publisher/order-created-publisher";
 
-const ORDER_EXPIRATION_WINDOW_SECONDS = 15 * 60;
+const ORDER_EXPIRATION_WINDOW_SECONDS = 10;
 const router = express.Router();
 
 router.post(
